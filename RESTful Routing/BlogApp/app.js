@@ -1,4 +1,5 @@
 const methodOverride = require("method-override"),
+    expressSanitizer = require("express-sanitizer"),
     bParser = require("body-parser"),
     mongoose = require("mongoose"),
     express = require("express"),
@@ -9,6 +10,7 @@ app.set("view engine", "ejs");
 app.use(express.static("public"));
 app.use(bParser.urlencoded({extended: true}));
 app.use(methodOverride("_method"));
+app.use(expressSanitizer());
 
 var blogSchema = new mongoose.Schema({
     title: String,
@@ -44,7 +46,9 @@ app.get("/blogs/new", function(req, res){
     res.render("new");
 });
 
+
 app.post("/blogs", function(req, res){
+    req.body.blog.body = req.sanitize(req.body.blog.body);
     Blog.create(req.body.blog, function(err, newBlog){
         if(err){
             res.render("new");
@@ -76,6 +80,7 @@ app.get("/blogs/:id/edit", function(req, res){
 });
 
 app.put("/blogs/:id",function(req,res){
+    req.body.blog.body = req.sanitize(req.body.blog.body);
     Blog.findByIdAndUpdate(req.params.id, req.body.blog, function(err, updatedBlog){
         if(err){
             console.log(err);

@@ -1,11 +1,15 @@
 .thumbnail img {
-    width: 100%;
+	width: 100%;
 }
 
 .thumbnail {
-    padding: 0px;
+	padding: 0px;
 }
 
 .thumbnail .caption-full {
-    padding: 9px;
+	padding: 9px;
+}
+
+.deleteForm {
+	display: inline;
 }

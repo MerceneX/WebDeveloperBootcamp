@@ -1,31 +1,33 @@
 <% include ./partials/header %>
 
 <div class="ui container text main">
-    <div class="ui huge header"> RESTful Blog App
-    </div>
-    <div class="ui top attached segment">
-        <div class="ui divided items">
-            <% blogs.forEach(function(blog){ %>
-            <div class="item">
-                <div class="image"><img src="<%=blog.image%>" alt=""></div>
-                <div class="content">
-                    <a href="/blogs/<%=blog.id%>" class="header">
-                        <%=blog.title%></a>
-                    <div class="meta">
-                        <span>
-                            <%=blog.created.toDateString()%></span>
-                    </div>
-                    <div class="description">
-                        <a href="/blogs/<%=blog.id%>" class="header">
-                            <%=blog.body.substring(0,100)%>...</a>
-                        <div class="extra">
-                            <a href="/blogs/<%=blog._id%>" class="ui floated violet button basic">Read More <i class="right chevron icon"></i></a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <%}) %>
-        </div>
-    </div>
+	<div class="ui huge header">RESTful Blog App</div>
+	<div class="ui top attached segment">
+		<div class="ui divided items">
+			<% blogs.forEach(function(blog){ %>
+			<div class="item">
+				<div class="image"><img src="<%=blog.image%>" alt="" /></div>
+				<div class="content">
+					<a href="/blogs/<%=blog.id%>" class="header"> <%=blog.title%></a>
+					<div class="meta">
+						<span> <%=blog.created.toDateString()%></span>
+					</div>
+					<div class="description">
+						<a href="/blogs/<%=blog.id%>" class="header">
+							<%=blog.body.substring(0,100)%>...</a
+						>
+						<div class="extra">
+							<a
+								href="/blogs/<%=blog._id%>"
+								class="ui floated violet button basic"
+								>Read More <i class="right chevron icon"></i
+							></a>
+						</div>
+					</div>
+				</div>
+			</div>
+			<%}) %>
+		</div>
+	</div>
 </div>
 <% include ./partials/footer %>

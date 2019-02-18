@@ -1,104 +1,51 @@
 const express = require("express"),
-    app = express(),
-    bodyParser = require("body-parser"),
-    mongoose = require("mongoose"),
-    Campground = require("./Models/campgrounds"),
-    Comment = require("./Models/comments"),
-    seedDB = require("./seeds");
+	app = express(),
+	bodyParser = require("body-parser"),
+	mongoose = require("mongoose"),
+	passport = require("passport"),
+	LocalStrategy = require("passport-local"),
+	Campground = require("./Models/campgrounds"),
+	Comment = require("./Models/comments"),
+	User = require("./Models/user"),
+	seedDB = require("./seeds"),
+	methodOverride = require("method-override"),
+	flash = require("connect-flash");
 
+const commentRoutes = require("./Routes/comments"),
+	campgroundRoutes = require("./Routes/campgrounds"),
+	indexRoutes = require("./Routes/index");
 
-mongoose.connect("mongodb://localhost/yelp_camp");
+mongoose.connect("mongodb://localhost/yelp_camp", { useNewUrlParser: true });
 app.set("view engine", "ejs");
-app.use(bodyParser());
+app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static(__dirname + "/public"));
-seedDB();
+app.use(methodOverride("_method"));
+app.use(flash());
+//seedDB();
 
-
-
-app.get("/", function (req, res) {
-    res.render("landing");
+app.use(
+	require("express-session")({
+		secret: "Once again Rusty wins cutest dog!",
+		resave: false,
+		saveUninitialized: false
+	})
+);
+app.use(passport.initialize());
+app.use(passport.session());
+passport.use(new LocalStrategy(User.authenticate()));
+passport.serializeUser(User.serializeUser());
+passport.deserializeUser(User.deserializeUser());
+app.use(function(req, res, next) {
+	res.locals.currentUser = req.user;
+	res.locals.error = req.flash("error");
+	res.locals.success = req.flash("success");
+	next();
 });
 
-app.get("/campgrounds", function (req, res) {
+app.use("/", indexRoutes);
+app.use("/campgrounds/:id/comments", commentRoutes);
+app.use("/campgrounds", campgroundRoutes);
 
-    Campground.find({}, function (err, allCampgrounds) {
-        if (err) {
-            console.log(err);
-        } else {
-            res.render("campgrounds/index", {
-                campgrounds: allCampgrounds
-            });
-        }
-    });
-});
-
-app.post("/campgrounds", function (req, res) {
-    var newCampground = {
-        name: req.body.name,
-        image: req.body.image,
-        description: req.body.description
-    }
-    Campground.create(newCampground, function (err, newlyCreated) {
-        if (err) {
-            console.log(err);
-        } else {
-            res.redirect("/campgrounds");
-        }
-    });
-});
-
-app.get("/campgrounds/new", function (req, res) {
-    res.render("campgrounds/new");
-});
-
-app.get("/campgrounds/:id", function (req, res) {
-    Campground.findById(req.params.id).populate("comments").exec(function (err, foundCG) {
-        if (err) {
-            console.log(err);
-        } else {
-            res.render("campgrounds/show", {
-                campground: foundCG
-            });
-        }
-    });
-});
-
-// ===================
-// Comments
-// ===================
-
-app.get("/campgrounds/:id/comments/new", function (req, res) {
-    Campground.findById(req.params.id, function (err, campground) {
-        if (err) {
-            console.log(err);
-        } else {
-            res.render("Comments/new", {
-                campground: campground
-            });
-        }
-    });
-});
-
-app.post("/campgrounds/:id/comments", function (req, res) {
-    Campground.findById(req.params.id, function (err, campground) {
-        if (err) {
-            console.log(err);
-            res.redirect("/campgrounds");
-        } else {
-            Comment.create(req.body.comment, function (err, comment) {
-                if (err) {
-                    console.log(err);
-                } else {
-                    campground.comments.push(comment);
-                    campground.save();
-                    res.redirect("/campgrounds/" + campground._id);
-                }
-            })
-        }
-    });
-});
-
-
-app.listen(3000, "localhost", function () {
-    console.log("Server started");
+app.listen(3000, "localhost", function() {
+	console.log("Server started");
 });
